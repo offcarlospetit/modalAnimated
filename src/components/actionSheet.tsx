@@ -21,17 +21,15 @@ export interface ActionSeehtProps {
 export const ActionSeeht: React.FC<ActionSeehtProps> = props => {
   const [heigthModal, setAligment] = useState(new Animated.Value(0));
   const [heigthView, setHeigthView] = useState(new Animated.Value(0));
-  const [visible, setVisible] = useState(props.visible);
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
-    onPanResponderMove: (event, gestureState) => {
+    onPanResponderMove: (e, gestureState) => {
       if (HEIGHT_MODAL - gestureState.dy < HEIGHT_MODAL)
         heigthModal.setValue(HEIGHT_MODAL - gestureState.dy)
     },
     onPanResponderRelease: (e, gesture) => {
       const shouldOpen = gesture.moveY >= 730;
-      console.log(gesture, shouldOpen)
       shouldOpen ? closeModal() : openModal()
     },
   })
