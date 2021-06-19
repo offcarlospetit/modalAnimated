@@ -1,12 +1,16 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
   Dimensions,
   Animated,
   TouchableWithoutFeedback,
+  PanResponder
 } from 'react-native';
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
+const HEIGHT_MODAL = height * 0.6
+
+
 export interface ActionSeehtProps {
   visible: boolean;
   onAnimationEnd: () => void;
@@ -19,11 +23,24 @@ export const ActionSeeht: React.FC<ActionSeehtProps> = props => {
   const [heigthView, setHeigthView] = useState(new Animated.Value(0));
   const [visible, setVisible] = useState(props.visible);
 
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderMove: (event, gestureState) => {
+      if (HEIGHT_MODAL - gestureState.dy < HEIGHT_MODAL)
+        heigthModal.setValue(HEIGHT_MODAL - gestureState.dy)
+    },
+    onPanResponderRelease: (e, gesture) => {
+      const shouldOpen = gesture.moveY >= 730;
+      console.log(gesture, shouldOpen)
+      shouldOpen ? closeModal() : openModal()
+    },
+  })
+
   function closeModal() {
     Animated.parallel([
       Animated.spring(heigthModal, {
         toValue: 0,
-        velocity: 10,
+        velocity: 6,
         tension: 2,
         friction: 8,
         useNativeDriver: false,
@@ -35,7 +52,7 @@ export const ActionSeeht: React.FC<ActionSeehtProps> = props => {
         friction: 8,
         useNativeDriver: false,
       }),
-    ]).start(({finished}) => {
+    ]).start(({ finished }) => {
       if (finished) {
         props.onAnimationCloseEnd ? props.onAnimationCloseEnd() : null;
       }
@@ -57,7 +74,7 @@ export const ActionSeeht: React.FC<ActionSeehtProps> = props => {
         friction: 8,
         useNativeDriver: false,
       }),
-    ]).start(({finished}) => {
+    ]).start(({ finished }) => {
       if (finished) {
         props.onAnimationOpenEnd ? props.onAnimationOpenEnd() : null;
       }
@@ -77,13 +94,9 @@ export const ActionSeeht: React.FC<ActionSeehtProps> = props => {
   return (
     <>
       <TouchableWithoutFeedback onPress={() => closeModal()}>
-        <Animated.View
-          style={[
-            styles.animatedBaseContainer,
-            {height: heigthView},
-          ]}></Animated.View>
+        <Animated.View style={[styles.animatedBaseContainer, { height: heigthView },]}></Animated.View>
       </TouchableWithoutFeedback>
-      <Animated.View style={[styles.container, actionSheetStyle]}>
+      <Animated.View {...panResponder.panHandlers} style={[styles.container, actionSheetStyle]}>
         <View style={styles.separatorView} />
         <View style={styles.wrapperContainer}>{props.children}</View>
       </Animated.View>
