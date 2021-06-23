@@ -8,8 +8,8 @@ import {
   PanResponder
 } from 'react-native';
 const { width, height } = Dimensions.get('window');
-const HEIGHT_MODAL = height * 0.6
-
+const HEIGHT_MODAL = height * 0.8
+const OPACITY = 1
 
 export interface ActionSeehtProps {
   visible: boolean;
@@ -21,12 +21,16 @@ export interface ActionSeehtProps {
 export const ActionSeeht: React.FC<ActionSeehtProps> = props => {
   const [heigthModal, setAligment] = useState(new Animated.Value(0));
   const [heigthView, setHeigthView] = useState(new Animated.Value(0));
+  const [fadeAnim, fadeAnimView] = useState(new Animated.Value(0));
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onPanResponderMove: (e, gestureState) => {
-      if (HEIGHT_MODAL - gestureState.dy < HEIGHT_MODAL)
+      if (HEIGHT_MODAL - gestureState.dy < HEIGHT_MODAL) {
         heigthModal.setValue(HEIGHT_MODAL - gestureState.dy)
+        if (((HEIGHT_MODAL - gestureState.dy) / 1000) <= 0.5)
+          fadeAnim.setValue(((HEIGHT_MODAL - gestureState.dy) / 1000))
+      }
     },
     onPanResponderRelease: (e, gesture) => {
       const shouldOpen = gesture.moveY >= 730;
@@ -36,18 +40,24 @@ export const ActionSeeht: React.FC<ActionSeehtProps> = props => {
 
   function closeModal() {
     Animated.parallel([
+      Animated.spring(fadeAnim, {
+        toValue: 0,
+        useNativeDriver: false,
+      }),
       Animated.spring(heigthModal, {
         toValue: 0,
         velocity: 6,
         tension: 2,
         friction: 8,
+        delay: 10,
         useNativeDriver: false,
       }),
       Animated.spring(heigthView, {
         toValue: 0,
-        velocity: 1,
+        velocity: 6,
         tension: 2,
         friction: 8,
+        delay: 10,
         useNativeDriver: false,
       }),
     ]).start(({ finished }) => {
@@ -56,22 +66,31 @@ export const ActionSeeht: React.FC<ActionSeehtProps> = props => {
       }
     });
   }
+
   function openModal() {
     Animated.parallel([
-      Animated.spring(heigthModal, {
-        toValue: height * 0.6,
-        velocity: 10,
-        tension: 2,
-        friction: 3,
+      Animated.timing(fadeAnim, {
+        toValue: 0.5,
+        duration: 300,
         useNativeDriver: false,
       }),
-      Animated.spring(heigthView, {
+      Animated.timing(heigthModal, {
+        toValue: height * 0.8,
+        // velocity: 10,
+        // tension: 8,
+        // friction: 10,
+        duration: 300,
+        useNativeDriver: false,
+      }),
+      Animated.timing(heigthView, {
         toValue: height,
-        velocity: 30,
-        tension: 1,
-        friction: 8,
+        // velocity: 6,
+        // tension: 2,
+        // friction: 8,
+        // delay: 10,
+        duration: 300,
         useNativeDriver: false,
-      }),
+      })
     ]).start(({ finished }) => {
       if (finished) {
         props.onAnimationOpenEnd ? props.onAnimationOpenEnd() : null;
@@ -82,6 +101,7 @@ export const ActionSeeht: React.FC<ActionSeehtProps> = props => {
   useEffect(() => {
     if (props.visible) {
       openModal();
+    } else {
     }
   });
 
@@ -89,10 +109,11 @@ export const ActionSeeht: React.FC<ActionSeehtProps> = props => {
     height: heigthModal,
   };
 
+  // console.warn(HEIGHT_MODAL)
   return (
     <>
       <TouchableWithoutFeedback onPress={() => closeModal()}>
-        <Animated.View style={[styles.animatedBaseContainer, { height: heigthView },]}></Animated.View>
+        <Animated.View style={[styles.animatedBaseContainer, { height: heigthView, opacity: fadeAnim }]}></Animated.View>
       </TouchableWithoutFeedback>
       <Animated.View {...panResponder.panHandlers} style={[styles.container, actionSheetStyle]}>
         <View style={styles.separatorView} />

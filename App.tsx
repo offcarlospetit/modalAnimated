@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,14 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
+  TextInput
 } from 'react-native';
-import {ActionSeeht} from './src/components/actionSheet';
-const {width, height} = Dimensions.get('window');
-export interface AppProps {}
+import { ActionSeeht } from './src/components/actionSheet';
+import 'intl';
+import 'intl/locale-data/jsonp/en-IN';
+import 'intl/locale-data/jsonp/en';
+const { width, height } = Dimensions.get('window');
+export interface AppProps { }
 
 function App(props: AppProps) {
   const [visible, setVisible] = useState(false);
@@ -17,24 +21,24 @@ function App(props: AppProps) {
   const onAnimationEnd = () => {
     setVisible(false);
     setEnabled(true);
-    Alert.alert('Navegación 👀');
   };
   const openModal = () => {
     setEnabled(!enabled);
     setVisible(!visible);
   };
+
   return (
-    <View style={{width, height}}>
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+    <View style={{ width, height }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <TouchableOpacity onPress={() => (enabled ? openModal() : null)}>
-          <Text style={{color: enabled ? 'black' : '#ffff'}}>App</Text>
+          <Text style={{ color: enabled ? 'black' : '#ffff' }}>App</Text>
         </TouchableOpacity>
       </View>
       <ActionSeeht
         visible={visible}
         onAnimationEnd={onAnimationEnd}
         onAnimationCloseEnd={onAnimationEnd}>
-        <Text>Hlas</Text>
+        <Text>Holas</Text>
       </ActionSeeht>
     </View>
   );
